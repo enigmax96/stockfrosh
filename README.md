@@ -1,13 +1,19 @@
 # stockfrosh
-Stockfish but worse. Quest to build a chess engine i cant beat.
-inspired by: https://www.chessprogramming.org
+- Stockfish but worse. Quest to build a chess engine i cant beat.
+- inspired by: https://www.chessprogramming.org
+- Usage( engine_id -> 1 - 2):
+```
+python3 main.py <white_engine_id> <black_engine_id> <num_games>
+```
 
-# Idea 
+
+
+## Idea 
 - An environment where two engines play many chess games against each other. The engine winning more games is stronger. 
 - By improving the evaluation function an engine uses to find the best move I can improve the engines strength. 
 - By improving the search algorithms used to find the best move I can improve search time and hopefully the depth of the position tree I am able to search.
 
-# Search
+## Search
 - The position tree:
 ```
 Initial Position
@@ -41,7 +47,7 @@ for move in legal_moves:
 
 - MiniMax, AlphaBeta Pruning, ...
 
-# Evaluation
+## Evaluation
 - function that returns a numeric value given any position
     - add values to pieces (pawn=1, rook= 5, knight=3, queen=9, ...)
     - count material for black and white, substract, return
@@ -53,4 +59,7 @@ for move in legal_moves:
 - https://chessify.me/blog/chess-engine-evaluation
 - https://www.chessprogramming.org/Evaluation
 
+## Future Implementations
+- get positions from https://database.lichess.org/ -> let engine evaluate position and compare the output with stockfish evaluation
+- build GUI to play the engines
 
