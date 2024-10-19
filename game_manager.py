@@ -23,6 +23,7 @@ class GameManager:
 
             while not game.is_game_over():
                 print(game)
+                print("---------------")
                 move = current_turn.get_best_move(game)
                 game.push(move)
                 current_turn = black_engine if current_turn == white_engine else white_engine
@@ -31,3 +32,13 @@ class GameManager:
             print(f"Game {game_number} result: {game.result()}")
 
         self.result_tracker.print_summary(self.num_games, self.white_engine_id, self.black_engine_id)
+        print ("\n")
+        print ("White engine:")
+        print ("-> Evaluation used: ", white_engine.eval_info)
+        print ("-> SearchAlgo used: ", white_engine.search_info)
+        print ("\n")
+        print ("Black engine:")
+        print ("-> Evaluation used: ", black_engine.eval_info)
+        print ("-> SearchAlgo used: ", black_engine.search_info)
+
+
