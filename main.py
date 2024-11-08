@@ -3,7 +3,7 @@ from game_manager import GameManager
 
 def main():
     if len(sys.argv) != 4:
-        print("Usage: python main.py <white_engine_id> <black_engine_id> <num_games>")
+        print("Usage: python3 main.py <white_engine_id> <black_engine_id> <num_games>")
         sys.exit(1)
 
     white_engine_id = int(sys.argv[1])
