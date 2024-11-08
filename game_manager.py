@@ -37,10 +37,13 @@ class GameManager:
                 move = current_turn.get_best_move(game)
                 game.push(move)
                 
-                # Diplay new position
+                # Diplay new position uncomment prints to get game in ASCII
                 fen_position = game.fen().split()[0]
                 vis_board.update_board(fen_position, self.pieces)  # Pass the FEN to the visualizer  
                 pygame.time.delay(100)
+
+                #print(game)
+                #print("---------------")
 
                 current_turn = black_engine if current_turn == white_engine else white_engine
 
