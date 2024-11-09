@@ -6,7 +6,7 @@ class ChessEngine:
     search_info = "no search used."
     def get_best_move(self, board):
         '''
-        play a random legal move
+        Play a random legal move
         '''
         legal_moves = list(board.legal_moves)
         return random.choice(legal_moves)

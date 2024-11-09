@@ -1,15 +1,14 @@
 import chess
 
 class ChessEngine:
-    eval_info = "uses piece counting with a reward for checkmate and punishment for repeated moves(to avoid rook shuffle)."
+    eval_info = "rewarding: material count and checkmate/ stalemate; punishment for repeated moves."
     search_info = "minimax search with depth 4."
 
     def __init__(self):
-        self.depth = 4  # Depth of minimax search
-        self.previous_boards = []  # Keep track of previous board states for repetition detection
+        self.depth = 4  
+        self.previous_boards = []  
 
     def get_best_move(self, board):
-        # Perform minimax search to find the best move
         best_move = None
         best_value = -float('inf') if board.turn == chess.WHITE else float('inf')
 
@@ -22,10 +21,14 @@ class ChessEngine:
                 best_value = board_value
                 best_move = move
 
-        self.previous_boards.append(board.copy())  # Store a copy of the board state to detect repetitive moves
+        self.previous_boards.append(board.copy())  
         return best_move
 
     def minimax(self, board, depth, alpha, beta, maximizing_player):
+        """
+        Searches the position tree recursivley until depth == 0.
+        Calls evaluation for each found position 
+        """
         if depth == 0 or board.is_game_over():
             return self.evaluate_board(board)
 
@@ -57,20 +60,18 @@ class ChessEngine:
         Evaluates the board using material counting 
         and rewards/punishes for checkmate, stalemate, and repeated moves.
         """
-        # Check if the game is over (checkmate, stalemate, etc.)
         if board.is_checkmate():
             if board.turn == chess.WHITE:  # Black has checkmated white
                 return -1000
             else:  # White has checkmated black
                 return 1000
         elif board.is_stalemate() or board.is_insufficient_material() or board.is_seventyfive_moves():
-            return 0  # Stalemate or draw has no value
+            return 0  # Stalemate or draw = no value
 
         value = self.evaluate_material(board)
 
-        # Penalize repeated positions to discourage shuffling the same piece
         if self.previous_boards.count(board) > 1:
-            value -= 0.5  # Penalize repeated positions
+            value -= 0.5  
 
         return value
 

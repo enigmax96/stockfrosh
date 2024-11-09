@@ -1,15 +1,14 @@
 import chess
 
 class ChessEngine:
-    eval_info = "rewarding: piece counting, central control, king safety, mobility "
+    eval_info = "rewarding: piece counting, central pawn control, king safety, mobility"
     search_info = "minimax search with depth 3."
 
     def __init__(self):
-        self.depth = 3  # Depth of minimax search
-        self.previous_boards = []  # Keep track of previous board states for repetition detection
+        self.depth = 3  
+        self.previous_boards = []  
 
     def get_best_move(self, board):
-        # Perform minimax search to find the best move
         best_move = None
         best_value = -float('inf') if board.turn == chess.WHITE else float('inf')
 
@@ -22,10 +21,14 @@ class ChessEngine:
                 best_value = board_value
                 best_move = move
 
-        self.previous_boards.append(board.copy())  # Store a copy of the board state to detect repetitive moves
+        self.previous_boards.append(board.copy())  
         return best_move
 
     def minimax(self, board, depth, alpha, beta, maximizing_player):
+        """
+        Searches the position tree recursivley until depth == 0.
+        Calls evaluation for each found position 
+        """
         if depth == 0 or board.is_game_over():
             return self.evaluate_board(board)
 
@@ -60,17 +63,16 @@ class ChessEngine:
         if board.is_checkmate():
             return 1000 if board.turn == chess.BLACK else -1000
         elif board.is_stalemate() or board.is_insufficient_material():
-            return 0  # Draw has no value
+            return 0 
 
         value = self.evaluate_material(board)
         value += self.evaluate_piece_positioning(board)
         value += self.evaluate_king_safety(board)
         value += self.evaluate_mobility(board)
 
-        # Penalize repeated board positions
         repetition_count = self.previous_boards.count(board)
         if repetition_count > 1:
-            value -= repetition_count * 0.5  # Increase penalty with repetition count
+            value -= repetition_count * 0.5  
 
         return value
 
@@ -95,7 +97,9 @@ class ChessEngine:
         return value
 
     def evaluate_piece_positioning(self, board):
-        # Positional evaluation, e.g., central control
+        """
+        Evaluates the piece activity using bitmaps for each piece
+        """
         piece_square_table = {
             chess.PAWN: [
                 0, 0, 0, 0, 0, 0, 0, 0,
@@ -107,7 +111,7 @@ class ChessEngine:
                 50, 50, 50, 50, 50, 50, 50, 50,
                 0, 0, 0, 0, 0, 0, 0, 0
             ],
-            # Similar tables can be created for other pieces like knights and bishops
+            # TODO for other pieces
         }
         position_value = 0
         for piece_type in piece_square_table:
@@ -118,13 +122,17 @@ class ChessEngine:
         return position_value
 
     def evaluate_king_safety(self, board):
-        # Basic king safety evaluation
+        """
+        Punishment for being in check
+        """
         safety_value = 0
         if board.is_check():
             safety_value -= 50 if board.turn == chess.WHITE else -50
         return safety_value
 
     def evaluate_mobility(self, board):
-        # Reward moves that increase mobility
+        """
+        Rewarding for having more legal moves available
+        """
         mobility_value = len(list(board.legal_moves))
         return mobility_value if board.turn == chess.WHITE else -mobility_value
