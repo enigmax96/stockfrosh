@@ -3,7 +3,7 @@ import chess
 #TODO white shuffles, black doesnt
 class ChessEngine:
     eval_info = "rewarding: piece counting, central pawn control, king safety, mobility"
-    search_info = "minimax search with depth 3."
+    search_info = "minimax search with alpha beta pruning, depth 3."
 
     def __init__(self):
         self.depth = 3  
