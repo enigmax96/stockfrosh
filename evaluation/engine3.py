@@ -1,5 +1,6 @@
 import chess
 
+#TODO white shuffles, black doesnt
 class ChessEngine:
     eval_info = "rewarding: piece counting, central pawn control, king safety, mobility"
     search_info = "minimax search with depth 3."
@@ -11,6 +12,7 @@ class ChessEngine:
     def get_best_move(self, board):
         best_move = None
         best_value = -float('inf') if board.turn == chess.WHITE else float('inf')
+        self.positions_searched = 0  
 
         for move in board.legal_moves:
             board.push(move)
@@ -22,14 +24,17 @@ class ChessEngine:
                 best_move = move
 
         self.previous_boards.append(board.copy())  
+        print(f"Best move found for  {'white' if board.turn == chess.WHITE else 'black'}: {best_value}")
+        print(f"Positions searched: {self.positions_searched}") 
         return best_move
 
     def minimax(self, board, depth, alpha, beta, maximizing_player):
         """
-        Searches the position tree recursivley until depth == 0.
+        Searches the position tree recursively until depth == 0.
         Calls evaluation for each found position 
         """
         if depth == 0 or board.is_game_over():
+            self.positions_searched += 1  
             return self.evaluate_board(board)
 
         if maximizing_player:
@@ -70,23 +75,16 @@ class ChessEngine:
         value += self.evaluate_king_safety(board)
         value += self.evaluate_mobility(board)
 
-        repetition_count = self.previous_boards.count(board)
-        if repetition_count > 1:
-            value -= repetition_count * 0.5  
-
         return value
 
     def evaluate_material(self, board):
-        """
-        Material evaluation: positive for white's advantage, negative for black's.
-        """
         piece_values = {
             chess.PAWN: 1,
             chess.KNIGHT: 3,
             chess.BISHOP: 3,
             chess.ROOK: 5,
             chess.QUEEN: 9,
-            chess.KING: 0  # King has no material value, it's priceless
+            chess.KING: 0
         }
 
         value = 0
@@ -97,42 +95,88 @@ class ChessEngine:
         return value
 
     def evaluate_piece_positioning(self, board):
-        """
-        Evaluates the piece activity using bitmaps for each piece
-        """
         piece_square_table = {
             chess.PAWN: [
-                0, 0, 0, 0, 0, 0, 0, 0,
-                5, 10, 10, -20, -20, 10, 10, 5,
-                5, -5, -10, 0, 0, -10, -5, 5,
-                0, 0, 0, 20, 20, 0, 0, 0,
-                5, 5, 10, 25, 25, 10, 5, 5,
-                10, 10, 20, 30, 30, 20, 10, 10,
+                0,  0,  0,  0,  0,  0,  0,  0,
                 50, 50, 50, 50, 50, 50, 50, 50,
-                0, 0, 0, 0, 0, 0, 0, 0
+                10, 10, 20, 30, 30, 20, 10, 10,
+                5,  5, 10, 25, 25, 10,  5,  5,
+                0,  0,  0, 20, 20,  0,  0,  0,
+                5, -5,-10,  0,  0,-10, -5,  5,
+                5, 10, 10,-20,-20, 10, 10,  5,
+                0,  0,  0,  0,  0,  0,  0,  0
             ],
-            # TODO for other pieces
+            chess.KNIGHT: [
+                -50,-40,-30,-30,-30,-30,-40,-50,
+                -40,-20,  0,  0,  0,  0,-20,-40,
+                -30,  0, 10, 15, 15, 10,  0,-30,
+                -30,  5, 15, 20, 20, 15,  5,-30,
+                -30,  0, 15, 20, 20, 15,  0,-30,
+                -30,  5, 10, 15, 15, 10,  5,-30,
+                -40,-20,  0,  5,  5,  0,-20,-40,
+                -50,-40,-30,-30,-30,-30,-40,-50
+            ],
+            chess.BISHOP: [
+                -20,-10,-10,-10,-10,-10,-10,-20,
+                -10,  0,  0,  0,  0,  0,  0,-10,
+                -10,  0,  5, 10, 10,  5,  0,-10,
+                -10,  5,  5, 10, 10,  5,  5,-10,
+                -10,  0, 10, 10, 10, 10,  0,-10,
+                -10, 10, 10, 10, 10, 10, 10,-10,
+                -10,  5,  0,  0,  0,  0,  5,-10,
+                -20,-10,-10,-10,-10,-10,-10,-20,
+            ],
+            chess.ROOK: [
+                0,  0,  0,  0,  0,  0,  0,  0,
+                5, 10, 10, 10, 10, 10, 10,  5,
+                -5,  0,  0,  0,  0,  0,  0, -5,
+                -5,  0,  0,  0,  0,  0,  0, -5,
+                -5,  0,  0,  0,  0,  0,  0, -5,
+                -5,  0,  0,  0,  0,  0,  0, -5,
+                -5,  0,  0,  0,  0,  0,  0, -5,
+                0,  0,  0,  5,  5,  0,  0,  0
+            ],
+            chess.QUEEN: [
+                0,  0,  0,  0,  0,  0,  0,  0,
+                5, 10, 10, 10, 10, 10, 10,  5,
+                -5,  0,  0,  0,  0,  0,  0, -5,
+                -5,  0,  0,  0,  0,  0,  0, -5,
+                -5,  0,  0,  0,  0,  0,  0, -5,
+                -5,  0,  0,  0,  0,  0,  0, -5,
+                -5,  0,  0,  0,  0,  0,  0, -5,
+                0,  0,  0,  5,  5,  0,  0,  0
+            ],
+            chess.KING: [
+                -30,-40,-40,-50,-50,-40,-40,-30,
+                -30,-40,-40,-50,-50,-40,-40,-30,
+                -30,-40,-40,-50,-50,-40,-40,-30,
+                -30,-40,-40,-50,-50,-40,-40,-30,
+                -20,-30,-30,-40,-40,-30,-30,-20,
+                -10,-20,-20,-20,-20,-20,-20,-10,
+                20, 20,  0,  0,  0,  0, 20, 20,
+                20, 30, 10,  0,  0, 10, 30, 20
+            ]
         }
-        position_value = 0
-        for piece_type in piece_square_table:
+        value = 0
+        for piece_type, table in piece_square_table.items():
             for square in board.pieces(piece_type, chess.WHITE):
-                position_value += piece_square_table[piece_type][square]
+                value += table[square]
             for square in board.pieces(piece_type, chess.BLACK):
-                position_value -= piece_square_table[piece_type][square]
-        return position_value
+                value -= table[square]
+        return value / 100 
 
     def evaluate_king_safety(self, board):
-        """
-        Punishment for being in check
-        """
-        safety_value = 0
-        if board.is_check():
-            safety_value -= 50 if board.turn == chess.WHITE else -50
-        return safety_value
+        king_pos = board.king(chess.WHITE)
+        if king_pos:
+            row, col = divmod(king_pos, 8)
+            if row >= 6:  
+                return 0.5
+        king_pos = board.king(chess.BLACK)
+        if king_pos:
+            row, col = divmod(king_pos, 8)
+            if row <= 1:
+                return -0.5
+        return 0
 
     def evaluate_mobility(self, board):
-        """
-        Rewarding for having more legal moves available
-        """
-        mobility_value = len(list(board.legal_moves))
-        return mobility_value if board.turn == chess.WHITE else -mobility_value
+        return (len(list(board.legal_moves)) / 10) if board.turn == chess.WHITE else -(len(list(board.legal_moves)) / 10)
