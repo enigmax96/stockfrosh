@@ -20,4 +20,7 @@ python3 main.py <white_engine_id> <black_engine_id> <num_games>
  - evaluates position based on material count, checkmate,  central pawn control, king safety, mobility 
  - uses minimax search
 
+### ID 4
+ - evaluates position based on material count, checkmate,  central pawn control, king safety, mobility 
+ - uses minimax search with alpha beta pruning
 
