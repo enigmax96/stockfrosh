@@ -1,40 +1,61 @@
+import time
 import chess
 
-#TODO white shuffles, black doesnt
 class ChessEngine:
     eval_info = "rewarding: piece counting, piece placement, king safety, mobility"
-    search_info = "minimax search with alpha beta pruning, depth 3."
+    search_info = "itterative deepening ( depth 5, time limit 5 s.), minimax search with alpha beta pruning"
 
-    def __init__(self):
-        self.depth = 3  
-        self.previous_boards = []  
+    def __init__(self, max_depth=5, time_limit=5.0):
+        self.max_depth = max_depth  
+        self.time_limit = time_limit  
+        self.start_time = None 
+        self.positions_searched = 0  
 
     def get_best_move(self, board):
+        self.start_time = time.time()
         best_move = None
         best_value = -float('inf') if board.turn == chess.WHITE else float('inf')
-        self.positions_searched = 0  
+
+        # Iterative deepening loop
+        for depth in range(1, self.max_depth + 1):
+            current_move, current_value = self.search_best_move(board, depth)
+            if current_move:
+                best_move = current_move
+                best_value = current_value
+            if time.time() - self.start_time > self.time_limit:
+                break  # Stop if time limit reached
+
+        print(f"Best move found for  {'white' if board.turn == chess.WHITE else 'black'}: {best_value}")
+        print(f"Positions searched: {self.positions_searched}")
+        return best_move
+
+    def search_best_move(self, board, depth):
+        best_move = None
+        best_value = -float('inf') if board.turn == chess.WHITE else float('inf')
+        alpha, beta = -float('inf'), float('inf')
 
         for move in board.legal_moves:
             board.push(move)
-            board_value = self.minimax(board, self.depth - 1, -float('inf'), float('inf'), not board.turn)
+            board_value = self.minimax(board, depth - 1, alpha, beta, not board.turn)
             board.pop()
 
             if (board.turn == chess.WHITE and board_value > best_value) or (board.turn == chess.BLACK and board_value < best_value):
                 best_value = board_value
                 best_move = move
 
-        self.previous_boards.append(board.copy())  
-        print(f"Best move found for  {'white' if board.turn == chess.WHITE else 'black'}: {best_value}")
-        print(f"Positions searched: {self.positions_searched}") 
-        return best_move
+            if board.turn == chess.WHITE:
+                alpha = max(alpha, best_value)
+            else:
+                beta = min(beta, best_value)
+
+            if beta <= alpha:
+                break  
+
+        return best_move, best_value
 
     def minimax(self, board, depth, alpha, beta, maximizing_player):
-        """
-        Searches the position tree recursively until depth == 0.
-        Calls evaluation for each found position 
-        """
-        if depth == 0 or board.is_game_over():
-            self.positions_searched += 1  
+        if depth == 0 or board.is_game_over() or (time.time() - self.start_time) > self.time_limit:
+            self.positions_searched += 1
             return self.evaluate_board(board)
 
         if maximizing_player:
