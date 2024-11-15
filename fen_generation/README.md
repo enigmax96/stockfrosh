@@ -1,9 +1,9 @@
 # FEN Generation
+Extracts FENs from pgn.zst file and stroes it in a json
 
 ## Usage
-Change path to the pgn.zst file 
 ```
-python3 pgn_to_fen.py
+python3 pgn_to_fen.py <path/to/pgn_zst_file>
 ```
 
 ## Note 

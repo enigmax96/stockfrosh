@@ -2,15 +2,13 @@ import chess.pgn
 import zstandard as zstd
 import io
 import os
-
-ZST_FILE_PATH = "/home/max/stockfrosh/fen_generation/lichess_db_standard_rated_2013-01.pgn.zst"
-OUTPUT_PATH = f"fens_from_{os.path.basename(ZST_FILE_PATH)}.txt"  
+import json
+import sys
 
 def extract_fen_from_zst(ZST_FILE_PATH, OUTPUT_PATH):
     """
-    Runs through every game from provided pgn.zst file and plays 10 moves. 
-    Safes the fen of the position to a txt file.
-    If the game has less than 10 mioves safe the fen of the last move.
+    Extracts the FEN from each game in the provided PGN.zst file.
+    Saves the FEN to a JSON file. If the game has fewer than 10 moves, saves the FEN of the last move.
     """
     # Open the .zst file with zstandard
     with open(ZST_FILE_PATH, "rb") as compressed_file:
@@ -25,37 +23,50 @@ def extract_fen_from_zst(ZST_FILE_PATH, OUTPUT_PATH):
             # Create a file-like object from the decoded string
             pgn_file = io.StringIO(pgn_text)
 
-            with open(OUTPUT_PATH, "w") as fen_file:
-                game_count = 0 
+            # Initialize a list to store the FENs
+            fen_list = []
+            game_count = 0
 
-                # Process each PGN game in the decompressed content
-                while True:
-                    game = chess.pgn.read_game(pgn_file)
-                    if game is None:
-                        break  # End of file
+            # Process each PGN game 
+            while True:
+                game = chess.pgn.read_game(pgn_file)
+                if game is None:
+                    break  
 
-                    board = game.board()
-                    move_count = 0
+                board = game.board()
+                move_count = 0
 
-                    # Play through the moves until we reach the 10th move or the game ends
-                    for move in game.mainline_moves():
-                        board.push(move)
-                        move_count += 1
-                        if move_count == 10:
-                            fen_file.write(board.fen() + "\n")  # Write the FEN after the 10th move
-                            break
-                    else:
-                        # If the loop completes without breaking (i.e., game ended before move 10)
-                        if move_count < 10:
-                            fen_file.write(board.fen() + "\n")  # Write the FEN from the last move
+                # Play through the moves until we reach the 10th move or the game ends
+                for move in game.mainline_moves():
+                    board.push(move)
+                    move_count += 1
+                    if move_count == 10:
+                        fen_list.append(board.fen())  
+                        break
+                else:
+                    # Append latest FEN, if Game has less than 10 moves
+                    if move_count < 10:
+                        fen_list.append(board.fen())  
 
-                    game_count += 1
-                    print(f"Processed game {game_count}")
+                game_count += 1
+                print(f"Processed game {game_count}")
 
-    print(f"FEN extraction after move 10 completed. Output saved to {OUTPUT_PATH}")
+    with open(OUTPUT_PATH, "w") as json_file:
+        json.dump(fen_list, json_file, indent=4)
 
+    print(f"FEN extraction completed. Output saved to {OUTPUT_PATH}")
 
+import os
+import sys
 
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python script.py <path_to_pgn.zst>")
+        sys.exit(1)
 
+    ZST_FILE_PATH = sys.argv[1]
+    dir_path = os.path.dirname(ZST_FILE_PATH)
+    OUTPUT_PATH = os.path.join(dir_path, f"fens_from_{os.path.basename(ZST_FILE_PATH)}.json")
 
-extract_fen_from_zst(ZST_FILE_PATH, OUTPUT_PATH)
+    extract_fen_from_zst(ZST_FILE_PATH, OUTPUT_PATH)
+
