@@ -24,5 +24,5 @@ python3 main.py <white_engine_id> <black_engine_id> <num_games>
  - evaluates position based on material count, checkmate,  piece placement, king safety, mobility 
  - uses itterative deepening, minimax search with alpha beta pruning
 
-![Profile Picture](stockfrosh_logo.jpeg)
+![Logo](stockfrosh_logo.jpeg)
 
