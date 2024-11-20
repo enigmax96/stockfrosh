@@ -17,13 +17,10 @@ def extract_fen_from_zst(ZST_FILE_PATH, OUTPUT_PATH):
         
         # Use a text stream to read the decompressed PGN data
         with dctx.stream_reader(compressed_file) as reader:
-            # Decode the binary stream into a string
             pgn_text = reader.read().decode("utf-8")
-
-            # Create a file-like object from the decoded string
             pgn_file = io.StringIO(pgn_text)
 
-            # Initialize a list to store the FENs
+            # List to store the FENs
             fen_list = []
             game_count = 0
 
@@ -51,8 +48,9 @@ def extract_fen_from_zst(ZST_FILE_PATH, OUTPUT_PATH):
                 game_count += 1
                 print(f"Processed game {game_count}")
 
+    output_data = {"fens": fen_list}
     with open(OUTPUT_PATH, "w") as json_file:
-        json.dump(fen_list, json_file, indent=4)
+        json.dump(output_data, json_file, indent=4)
 
     print(f"FEN extraction completed. Output saved to {OUTPUT_PATH}")
 
@@ -61,7 +59,7 @@ import sys
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python script.py <path_to_pgn.zst>")
+        print("Usage: python3 pgn_to_fen.py <path_to_pgn.zst>")
         sys.exit(1)
 
     ZST_FILE_PATH = sys.argv[1]
@@ -69,4 +67,3 @@ if __name__ == "__main__":
     OUTPUT_PATH = os.path.join(dir_path, f"fens_from_{os.path.basename(ZST_FILE_PATH)}.json")
 
     extract_fen_from_zst(ZST_FILE_PATH, OUTPUT_PATH)
-

@@ -22,15 +22,8 @@ class ChessEngine:
                 best_value = board_value
                 best_move = move
 
-                
-        if board.fullmove_number < 7:
-            print ("opening")
-        elif not is_endgame:
-            print ("middlegame")
-        else:
-            print ("endgame")
-        print(f"Best move found for  {'white' if board.turn == chess.WHITE else 'black'}: {best_value}")
-        print(f"Positions searched: {self.positions_searched}") 
+        #print(f"Best move found for  {'white' if board.turn == chess.WHITE else 'black'}: {best_value}")
+        #print(f"Positions searched: {self.positions_searched}") 
         return best_move
 
     def minimax(self, board, depth, alpha, beta, maximizing_player):

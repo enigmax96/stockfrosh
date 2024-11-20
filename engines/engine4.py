@@ -24,9 +24,9 @@ class ChessEngine:
                 best_value = current_value
             if time.time() - self.start_time > self.time_limit:
                 break  # Stop if time limit reached
-        print(f"Full move {board.fullmove_number}")
-        print(f"Best Eval found for  {'white' if board.turn == chess.WHITE else 'black'}: {best_value}")
-        print(f"Positions searched: {self.positions_searched}")
+        #print(f"Full move {board.fullmove_number}")
+        #print(f"Best Eval found for  {'white' if board.turn == chess.WHITE else 'black'}: {best_value}")
+        #print(f"Positions searched: {self.positions_searched}")
         return best_move
 
     def search_best_move(self, board, depth):
